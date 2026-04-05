@@ -1,6 +1,8 @@
 {
   "rewrites": [
+    { "source": "/api/assessments/:id", "destination": "/api/assessments/[id]" },
+    { "source": "/api/subscriptions/check", "destination": "/api/subscriptions/check" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+    { "source": "/((?!api|assets).*)", "destination": "/index.html" }
   ]
 }
