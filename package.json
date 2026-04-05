@@ -1,0 +1,24 @@
+{
+  "name": "biostack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaxscape0/biostack.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zaxscape0/biostack/issues"
+  },
+  "homepage": "https://github.com/zaxscape0/biostack#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.101.1",
+    "pg": "^8.20.0"
+  }
+}
