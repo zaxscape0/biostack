@@ -1,6 +1,11 @@
 /**
  * BioStack Recommendation Engine
  * Generates personalized peptide, supplement, and lifestyle recommendations
+ *
+ * NOTE: Cholesterol markers (totalCholesterol, ldl, hdl, triglycerides, apoB, lpa)
+ * are processed below but the frontend form does not yet have input fields for them.
+ * The bloodwork JSONB column already supports arbitrary keys — no schema change needed.
+ * When frontend source is available, add these fields to the bloodwork form step.
  */
 
 function generateRecommendations(assessment) {
@@ -175,12 +180,12 @@ function generateRecommendations(assessment) {
   recs.push({
     name: 'Omega-3 (EPA/DHA)',
     category: 'supplement',
-    match_strength: 'medium',
+    match_strength: (bloodwork.triglycerides && bloodwork.triglycerides >= 100) || (bloodwork.hsCRP && bloodwork.hsCRP > 1) ? 'high' : 'medium',
     research_status: 'established',
-    reasoning: `Omega-3 fatty acids support cardiovascular health, reduce systemic inflammation${bloodwork.hsCRP && bloodwork.hsCRP > 1 ? ` (your hsCRP of ${bloodwork.hsCRP} mg/L suggests elevated inflammation)` : ''}, and benefit brain function.`,
-    dosage: '2–3 g combined EPA/DHA daily (aim for 2:1 EPA:DHA ratio)',
+    reasoning: `Omega-3 fatty acids support cardiovascular health, reduce systemic inflammation${bloodwork.hsCRP && bloodwork.hsCRP > 1 ? ` (your hsCRP of ${bloodwork.hsCRP} mg/L suggests elevated inflammation)` : ''}${bloodwork.triglycerides && bloodwork.triglycerides >= 100 ? ` and help lower triglycerides (yours: ${bloodwork.triglycerides} mg/dL)` : ''}, and benefit brain function.`,
+    dosage: bloodwork.triglycerides && bloodwork.triglycerides >= 100 ? '3–4 g combined EPA/DHA daily (high EPA ratio preferred)' : '2–3 g combined EPA/DHA daily (aim for 2:1 EPA:DHA ratio)',
     timing: 'With meals to improve absorption and reduce fishy aftertaste',
-    mechanism: 'EPA and DHA are incorporated into cell membranes, produce anti-inflammatory resolvins and protectins, lower triglycerides, and support neuronal membrane fluidity.'
+    mechanism: 'EPA and DHA are incorporated into cell membranes, produce anti-inflammatory resolvins and protectins, lower triglycerides by reducing hepatic VLDL output, and support neuronal membrane fluidity.'
   });
 
   if (stress >= 3 || goals.includes('hormone-optimization')) {
@@ -302,6 +307,150 @@ function generateRecommendations(assessment) {
       dosage: '2–5 minutes cold water (50–59°F) 3–4x per week',
       timing: 'Morning for the energizing norepinephrine boost. Avoid within 4 hours after resistance training (may blunt hypertrophy).',
       mechanism: 'Cold exposure triggers norepinephrine release (2–3x baseline), activates brown fat thermogenesis via UCP1, increases mitochondrial biogenesis, and upregulates cold shock proteins (RBM3) with neuroprotective effects.'
+    });
+  }
+
+  // ── CHOLESTEROL / LIPID PANEL ──────────────────────────────
+  // Markers: totalCholesterol, ldl, hdl, triglycerides, apoB, lpa
+  // Optimal ranges:
+  //   LDL: <100 optimal, 100-129 borderline, ≥130 high
+  //   HDL: >60 (male) / >70 (female) optimal; <40 (male) / <50 (female) low
+  //   Triglycerides: <100 optimal, 100-149 borderline, ≥150 high
+  //   ApoB: <90 mg/dL, <70 for high-risk
+  //   Lp(a): >75 nmol/L elevated (genetic, limited treatment)
+  //   Total Cholesterol: context-dependent (ratios matter more)
+
+  const ldl = bloodwork.ldl;
+  const hdl = bloodwork.hdl;
+  const trigs = bloodwork.triglycerides;
+  const apoB = bloodwork.apoB;
+  const lpa = bloodwork.lpa;
+  const totalChol = bloodwork.totalCholesterol;
+
+  const hasAnyCholesterol = ldl || hdl || trigs || apoB || lpa || totalChol;
+
+  // High LDL or ApoB → Berberine
+  const highLDL = ldl && ldl >= 130;
+  const borderlineLDL = ldl && ldl >= 100 && ldl < 130;
+  const highApoB = apoB && apoB >= 90;
+
+  if (highLDL || highApoB) {
+    recs.push({
+      name: 'Berberine',
+      category: 'supplement',
+      match_strength: 'high',
+      research_status: 'established',
+      reasoning: `${highLDL ? `Your LDL of ${ldl} mg/dL is above optimal (<100 mg/dL). ` : ''}${highApoB ? `Your ApoB of ${apoB} mg/dL exceeds the recommended threshold (<90 mg/dL). ` : ''}Berberine has been shown to reduce LDL by 20–30% in clinical trials, comparable to moderate-dose statins. It also improves insulin sensitivity and glucose metabolism.`,
+      dosage: '500 mg 2–3x daily (1,000–1,500 mg total)',
+      timing: 'With meals to reduce GI side effects and improve absorption. Space doses throughout the day.',
+      mechanism: 'Berberine upregulates LDL receptors via PCSK9 inhibition, activates AMPK (improving lipid and glucose metabolism), inhibits cholesterol absorption in the intestine, and reduces hepatic lipogenesis. It also modulates gut microbiota to produce beneficial short-chain fatty acids.'
+    });
+  } else if (borderlineLDL) {
+    // Borderline LDL → Citrus Bergamot (gentler intervention)
+    recs.push({
+      name: 'Citrus Bergamot Extract',
+      category: 'supplement',
+      match_strength: 'medium',
+      research_status: 'emerging',
+      reasoning: `Your LDL of ${ldl} mg/dL is in the borderline range (100–129 mg/dL). Citrus bergamot is a well-tolerated natural approach to optimizing lipid levels before stronger interventions are needed.`,
+      dosage: '500–1,000 mg/day standardized extract (min 25% flavonoids)',
+      timing: 'With a meal, once or twice daily',
+      mechanism: 'Bergamot polyphenols (brutieridin, melitidin) inhibit HMG-CoA reductase (statin-like mechanism), reduce ApoB secretion, activate AMPK, and increase LDL receptor recycling. Clinical trials show 20–30% LDL reduction at therapeutic doses.'
+    });
+  }
+
+  // Elevated Triglycerides → upgrade Omega-3 recommendation
+  const highTrigs = trigs && trigs >= 150;
+  const borderlineTrigs = trigs && trigs >= 100 && trigs < 150;
+
+  if (highTrigs) {
+    // Remove any existing standard-dose Omega-3 rec so we can replace it
+    const existingOmegaIdx = recs.findIndex(r => r.name.includes('Omega-3'));
+    if (existingOmegaIdx !== -1) recs.splice(existingOmegaIdx, 1);
+
+    recs.push({
+      name: 'Omega-3 (High-Dose EPA)',
+      category: 'supplement',
+      match_strength: 'high',
+      research_status: 'established',
+      reasoning: `Your triglycerides of ${trigs} mg/dL are elevated (optimal <100, high ≥150). High-dose EPA (icosapent ethyl) has been shown in the REDUCE-IT trial to lower cardiovascular events by 25% in patients with elevated triglycerides. Prescription-strength EPA is most effective.`,
+      dosage: '2–4 g EPA daily (aim for pure EPA or high EPA:DHA ratio ≥4:1)',
+      timing: 'With meals containing fat for absorption. Split into 2 doses (morning and evening).',
+      mechanism: 'High-dose EPA reduces hepatic VLDL synthesis, enhances lipoprotein lipase activity (clearing triglyceride-rich particles), stabilizes atherosclerotic plaques via anti-inflammatory resolvins, and reduces residual cardiovascular risk independent of LDL lowering.'
+    });
+  }
+
+  // Low HDL → Niacin
+  const lowHDL = hdl && ((sex === 'male' && hdl < 40) || (sex === 'female' && hdl < 50));
+  const suboptimalHDL = hdl && ((sex === 'male' && hdl < 60) || (sex === 'female' && hdl < 70));
+
+  if (lowHDL || (lpa && lpa > 75)) {
+    recs.push({
+      name: 'Niacin (Vitamin B3)',
+      category: 'supplement',
+      match_strength: lowHDL ? 'high' : 'medium',
+      research_status: 'established',
+      reasoning: `${lowHDL ? `Your HDL of ${hdl} mg/dL is below the critical threshold (${sex === 'male' ? '<40' : '<50'} mg/dL). Niacin is the most effective agent for raising HDL, typically increasing it by 20–35%. ` : ''}${lpa && lpa > 75 ? `Your Lp(a) of ${lpa} nmol/L is elevated (>75 nmol/L). Niacin is one of the few agents shown to reduce Lp(a) by 20–30%, though genetic Lp(a) levels are difficult to fully normalize. ` : ''}Start low and titrate up to minimize flushing.`,
+      dosage: '500 mg–2,000 mg/day (start at 500 mg, increase by 500 mg every 2–4 weeks)',
+      timing: 'Before bed with a small snack. Take aspirin (81 mg) or apple 30 min before to reduce flushing. Use extended-release form only.',
+      mechanism: 'Niacin inhibits hepatic diacylglycerol acyltransferase-2 (reducing VLDL/triglyceride synthesis), decreases ApoB secretion, reduces Lp(a) by inhibiting apo(a) synthesis in the liver, and raises HDL by reducing HDL-ApoA-I catabolism via inhibition of CETP activity.'
+    });
+  }
+
+  // CoQ10 — cardiovascular support, especially important with berberine/statins
+  if (hasAnyCholesterol && (highLDL || highApoB || age >= 40)) {
+    recs.push({
+      name: 'Coenzyme Q10 (Ubiquinol)',
+      category: 'supplement',
+      match_strength: highLDL || highApoB ? 'high' : 'medium',
+      research_status: 'established',
+      reasoning: `${highLDL || highApoB ? 'Berberine and statins both inhibit the mevalonate pathway, which also produces CoQ10. Supplementation prevents depletion and reduces muscle-related side effects. ' : ''}At age ${age}, endogenous CoQ10 production declines significantly. CoQ10 is essential for mitochondrial energy production and is a powerful lipid-soluble antioxidant protecting LDL from oxidation.`,
+      dosage: '100–200 mg/day ubiquinol (reduced form, superior absorption to ubiquinone)',
+      timing: 'With a fat-containing meal. Morning preferred for energy support.',
+      mechanism: 'Ubiquinol is the electron carrier in mitochondrial complexes I–III of the electron transport chain, essential for ATP synthesis. As an antioxidant, it regenerates vitamin E and prevents LDL oxidation (ox-LDL is the key driver of atherosclerosis). It also improves endothelial function via nitric oxide pathways.'
+    });
+  }
+
+  // Plant Sterols for LDL reduction (additive to other interventions)
+  if (highLDL || (borderlineLDL && highApoB)) {
+    recs.push({
+      name: 'Plant Sterols / Stanols',
+      category: 'supplement',
+      match_strength: highLDL ? 'medium' : 'low',
+      research_status: 'established',
+      reasoning: `${ldl ? `With an LDL of ${ldl} mg/dL, ` : ''}plant sterols provide an additional 6–15% LDL reduction that stacks with other interventions (berberine, citrus bergamot, diet). They are FDA-approved for cholesterol reduction claims.`,
+      dosage: '2–3 g/day of plant sterols or stanols',
+      timing: 'Divided across 2–3 meals. Must be taken with food containing dietary cholesterol for maximum competitive inhibition.',
+      mechanism: 'Plant sterols are structurally similar to cholesterol and compete for absorption in intestinal micelles via NPC1L1 transporters. This reduces dietary and biliary cholesterol absorption by ~50%, triggering upregulation of hepatic LDL receptors to compensate, lowering circulating LDL.'
+    });
+  }
+
+  // Elevated Lp(a) advisory (genetic marker, limited interventions)
+  if (lpa && lpa > 75) {
+    recs.push({
+      name: 'Lp(a) Monitoring & Risk Management',
+      category: 'lifestyle',
+      match_strength: 'high',
+      research_status: 'established',
+      reasoning: `Your Lp(a) of ${lpa} nmol/L is elevated (>75 nmol/L). Lp(a) is ~90% genetically determined and is an independent cardiovascular risk factor. While few interventions significantly lower it, aggressive management of other modifiable risk factors (LDL, blood pressure, inflammation) becomes critical. Niacin may reduce Lp(a) by 20–30%. Novel antisense oligonucleotide therapies (pelacarsen) are in Phase 3 trials.`,
+      dosage: 'Retest annually. Discuss with cardiologist if >125 nmol/L.',
+      timing: 'Ensure all other CV risk factors are optimally controlled. Consider coronary calcium score (CAC) for further risk stratification.',
+      mechanism: 'Lp(a) consists of an LDL-like particle bound to apolipoprotein(a). It promotes atherosclerosis (via ox-phospholipid cargo), impairs fibrinolysis (structural homology to plasminogen), and drives inflammation. Levels are primarily determined by the LPA gene and minimally affected by lifestyle.'
+    });
+  }
+
+  // Cardiovascular exercise lifestyle rec if lipids are off
+  const lipidsOff = highLDL || highTrigs || lowHDL || highApoB;
+  if (lipidsOff && !recs.find(r => r.name === 'Cardiovascular Exercise Protocol')) {
+    recs.push({
+      name: 'Cardiovascular Exercise Protocol',
+      category: 'lifestyle',
+      match_strength: 'high',
+      research_status: 'established',
+      reasoning: `Your lipid panel shows areas for improvement${highTrigs ? ` (triglycerides: ${trigs} mg/dL)` : ''}${lowHDL ? ` (HDL: ${hdl} mg/dL)` : ''}${highLDL ? ` (LDL: ${ldl} mg/dL)` : ''}. Regular aerobic exercise is one of the most effective non-pharmacological interventions for lipid optimization — it raises HDL by 5–10%, lowers triglycerides by 15–30%, and improves LDL particle size.`,
+      dosage: '150–300 min/week moderate-intensity or 75–150 min/week vigorous aerobic exercise',
+      timing: 'Spread across 5+ days. Zone 2 training (conversational pace) for base; add 1–2 HIIT sessions weekly for triglyceride reduction.',
+      mechanism: 'Aerobic exercise increases lipoprotein lipase activity (clearing triglyceride-rich particles), upregulates ABCA1 transporters (reverse cholesterol transport → higher HDL), improves endothelial nitric oxide production, reduces arterial stiffness, and shifts LDL from small dense (pattern B) to large buoyant (pattern A) particles.'
     });
   }
 

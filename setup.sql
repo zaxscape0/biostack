@@ -1,3 +1,7 @@
+-- Cholesterol/lipid markers (totalCholesterol, ldl, hdl, triglycerides, apoB, lpa)
+-- are stored in the `bloodwork` JSONB column alongside existing markers.
+-- No schema change needed — JSONB accepts arbitrary keys.
+
 CREATE TABLE IF NOT EXISTS biostack_assessments (
   id SERIAL PRIMARY KEY,
   age INT NOT NULL,
