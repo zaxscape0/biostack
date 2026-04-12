@@ -19,6 +19,7 @@
   "homepage": "https://github.com/zaxscape0/biostack#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.101.1",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "stripe": "^22.0.1"
   }
 }

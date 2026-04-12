@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:1080px; height:2400px; font-family:'Inter',sans-serif; overflow:hidden; background:#f5f0e8; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:60px; }
+  .option { position:relative; }
+  .option-label { font-family:'Inter'; font-size:18px; font-weight:700; color:#3d3a38; text-transform:uppercase; letter-spacing:3px; margin-bottom:16px; }
+  .card { width:100%; aspect-ratio:1/1.25; background:#f5f0e8; display:flex; flex-direction:column; justify-content:center; padding:50px; }
+  .q { font-family:'Playfair Display',serif; font-size:36px; font-weight:400; color:#3d3a38; line-height:1.15; margin-bottom:28px; }
+  .q em { color:#2faa6a; font-style:italic; }
+  .desc { font-family:'Playfair Display',serif; font-size:18px; color:#3d3a38; line-height:1.5; margin-top:20px; }
+
+  /* OPTION A — Underline accent */
+  .pill-a {
+    display:inline-block; padding:8px 0; margin-bottom:8px;
+  }
+  .pill-a span {
+    font-family:'Playfair Display',serif; font-size:44px; font-weight:700; color:#2faa6a; line-height:1.2;
+    border-bottom:4px solid #2faa6a; padding-bottom:6px;
+  }
+
+  /* OPTION B — Left green bar */
+  .pill-b {
+    display:inline-block; padding:20px 0 20px 28px;
+    border-left:5px solid #2faa6a;
+  }
+  .pill-b span {
+    font-family:'Playfair Display',serif; font-size:44px; font-weight:700; color:#2faa6a; line-height:1.2;
+  }
+
+  /* OPTION C — Outlined / border only */
+  .pill-c {
+    display:inline-block; padding:28px 40px;
+    border:2px solid #2faa6a; border-radius:8px;
+  }
+  .pill-c span {
+    font-family:'Playfair Display',serif; font-size:44px; font-weight:700; color:#2faa6a; line-height:1.2;
+  }
+
+  /* OPTION D — Background blob / organic shape */
+  .pill-d {
+    display:inline-block; padding:28px 44px; position:relative;
+    background: radial-gradient(ellipse at 50% 50%, rgba(47,170,106,0.15) 0%, rgba(47,170,106,0.05) 60%, transparent 80%);
+  }
+  .pill-d span {
+    font-family:'Playfair Display',serif; font-size:44px; font-weight:700; color:#2faa6a; line-height:1.2;
+    position:relative; z-index:1;
+  }
+</style>
+</head>
+<body>
+<div class="grid">
+
+  <div class="option">
+    <div class="option-label">Option A — Underline</div>
+    <div class="card">
+      <div class="q">Struggling with <em>poor sleep</em> & feeling wired at night?</div>
+      <div class="pill-a"><span>Magnesium<br>glycinate</span></div>
+      <div class="desc">Binds GABA receptors to calm your nervous system. 400–600mg before bed.</div>
+    </div>
+  </div>
+
+  <div class="option">
+    <div class="option-label">Option B — Left Bar</div>
+    <div class="card">
+      <div class="q">Struggling with <em>poor sleep</em> & feeling wired at night?</div>
+      <div class="pill-b"><span>Magnesium<br>glycinate</span></div>
+      <div class="desc">Binds GABA receptors to calm your nervous system. 400–600mg before bed.</div>
+    </div>
+  </div>
+
+  <div class="option">
+    <div class="option-label">Option C — Outlined Box</div>
+    <div class="card">
+      <div class="q">Struggling with <em>poor sleep</em> & feeling wired at night?</div>
+      <div class="pill-c"><span>Magnesium<br>glycinate</span></div>
+      <div class="desc">Binds GABA receptors to calm your nervous system. 400–600mg before bed.</div>
+    </div>
+  </div>
+
+  <div class="option">
+    <div class="option-label">Option D — Soft Blob</div>
+    <div class="card">
+      <div class="q">Struggling with <em>poor sleep</em> & feeling wired at night?</div>
+      <div class="pill-d"><span>Magnesium<br>glycinate</span></div>
+      <div class="desc">Binds GABA receptors to calm your nervous system. 400–600mg before bed.</div>
+    </div>
+  </div>
+
+</div>
+</body></html>
