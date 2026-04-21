@@ -12,6 +12,13 @@ module.exports = async (req, res) => {
     const goals = typeof body.goals === 'string' ? JSON.parse(body.goals) : body.goals;
     const bloodwork = typeof body.bloodwork === 'string' ? JSON.parse(body.bloodwork) : (body.bloodwork || {});
 
+    // Map string stress levels to integers (DB column is INT)
+    const stressMap = { low: 1, mild: 2, moderate: 3, high: 4, severe: 5 };
+    const stressRaw = body.stressLevel;
+    const stressLevel = typeof stressRaw === 'string' && isNaN(stressRaw)
+      ? (stressMap[stressRaw.toLowerCase()] ?? 3)
+      : (parseInt(stressRaw, 10) || 3);
+
     const { data: assessment, error: insertError } = await supabase
       .from('biostack_assessments')
       .insert({
@@ -23,7 +30,7 @@ module.exports = async (req, res) => {
         bloodwork: bloodwork,
         sleep_hours: body.sleepHours,
         exercise_days: body.exerciseDays,
-        stress_level: body.stressLevel,
+        stress_level: stressLevel,
         current_supplements: body.currentSupplements || null,
         allergies: body.allergies || null,
       })
@@ -42,7 +49,7 @@ module.exports = async (req, res) => {
       bloodwork,
       sleep_hours: body.sleepHours,
       exercise_days: body.exerciseDays,
-      stress_level: body.stressLevel,
+      stress_level: stressLevel,
     });
 
     const recsWithAssessment = recs.map(r => ({
