@@ -75,14 +75,15 @@ function buildGenericEmail(email) {
           <!-- Supplements -->
           ${supplementRows}
 
-          <!-- CTA -->
+          <!-- Subscription upsell -->
           <tr>
-            <td style="padding: 36px 40px; text-align: center; background: #111;">
-              <p style="margin: 0 0 20px; font-size: 15px; color: #888; line-height: 1.6;">
-                Want a personalized protocol based on your goals, bloodwork, and biology?
+            <td style="padding: 28px 40px; background: #111; border-top: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; text-align: center;">
+              <div style="font-size: 13px; color: #2faa6a; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px;">BioStack Pro</div>
+              <p style="margin: 0 0 16px; font-size: 15px; color: #aaa; line-height: 1.6;">
+                Want a protocol built around <em>your</em> goals, bloodwork, and biology? Take the full assessment and get personalized peptide, supplement, and lifestyle recommendations.
               </p>
-              <a href="https://trybiostack.com" style="display: inline-block; background: #2faa6a; color: #000; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 800; font-size: 15px;">
-                Get Your Full Protocol →
+              <a href="https://trybiostack.com" style="display: inline-block; background: #2faa6a; color: #000; text-decoration: none; padding: 13px 28px; border-radius: 8px; font-weight: 800; font-size: 14px;">
+                Get Your Personalized Protocol →
               </a>
             </td>
           </tr>
@@ -157,14 +158,35 @@ function buildPersonalizedEmail(email, recommendations) {
           <!-- Recs -->
           ${recRows}
 
-          <!-- CTA -->
+          <!-- Affiliate shop block -->
           <tr>
-            <td style="padding: 36px 40px; text-align: center; background: #111;">
-              <p style="margin: 0 0 20px; font-size: 15px; color: #888; line-height: 1.6;">
-                See your full protocol with detailed sourcing, cycle timing, and stack synergies.
+            <td style="padding: 28px 40px; background: #0a0a0a; border-top: 1px solid #1a1a1a;">
+              <div style="font-size: 13px; color: #555; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px;">Ready to start?</div>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-right: 8px;">
+                    <a href="https://www.amazon.com/dp/B002DYIZEO?tag=biostack-20" style="display: block; background: #161616; border: 1px solid #2faa6a; color: #2faa6a; text-decoration: none; padding: 11px 0; border-radius: 7px; font-weight: 700; font-size: 13px; text-align: center;">💪 Creatine</a>
+                  </td>
+                  <td style="padding: 0 4px;">
+                    <a href="https://www.amazon.com/dp/B01DBTFO98?tag=biostack-20" style="display: block; background: #161616; border: 1px solid #2faa6a; color: #2faa6a; text-decoration: none; padding: 11px 0; border-radius: 7px; font-weight: 700; font-size: 13px; text-align: center;">☀️ Vitamin D</a>
+                  </td>
+                  <td style="padding-left: 8px;">
+                    <a href="https://www.amazon.com/dp/B07H93K1C5?tag=biostack-20" style="display: block; background: #161616; border: 1px solid #2faa6a; color: #2faa6a; text-decoration: none; padding: 11px 0; border-radius: 7px; font-weight: 700; font-size: 13px; text-align: center;">🐟 Fish Oil</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Subscription upsell -->
+          <tr>
+            <td style="padding: 28px 40px; background: #111; border-top: 1px solid #1a1a1a; text-align: center;">
+              <div style="font-size: 13px; color: #2faa6a; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px;">BioStack Pro</div>
+              <p style="margin: 0 0 16px; font-size: 15px; color: #aaa; line-height: 1.6;">
+                Unlock cycle timing, stack synergies, bloodwork interpretation, and your full optimization roadmap.
               </p>
-              <a href="https://trybiostack.com" style="display: inline-block; background: #2faa6a; color: #000; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 800; font-size: 15px;">
-                View Full Protocol →
+              <a href="https://trybiostack.com" style="display: inline-block; background: #2faa6a; color: #000; text-decoration: none; padding: 13px 28px; border-radius: 8px; font-weight: 800; font-size: 14px;">
+                Upgrade to Pro →
               </a>
             </td>
           </tr>
