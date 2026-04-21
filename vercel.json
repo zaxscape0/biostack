@@ -4,5 +4,11 @@
     { "source": "/api/subscriptions/check", "destination": "/api/subscriptions/check" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/((?!api|assets).*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/follow-up",
+      "schedule": "0 * * * *"
+    }
   ]
 }
